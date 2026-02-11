@@ -1,0 +1,41 @@
+[package]
+name = "testactivity"
+version = "0.1.0"
+edition = "2024"
+
+# Exclude from parent workspace
+#[workspace]
+
+[dependencies]
+jni.workspace = true
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = [
+    "fmt",
+    "env-filter",
+    "tracing-log",
+] }
+paranoid-android = "0.2"
+
+[build-dependencies]
+jbindgen = { path = "../jbindgen" }
+javac.workspace = true
+ureq = "2"
+
+[dev-dependencies]
+javac.workspace = true
+serial_test = "3"
+adb_client = "3.1"
+android-emulator = "0.2"
+tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros"] }
+test-log = { version = "0.2", features = ["trace"] }
+
+[lib]
+crate-type = ["cdylib"]
+
+[features]
+sdk_util_time_utils = []
+sdk_os_build = []
+sdk_os_binder = []
+sdk_bluetooth = []
+sdk_content_intent = []
+sdk_net_uri = []

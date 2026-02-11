@@ -1,0 +1,18 @@
+[workspace]
+resolver = "3"
+members = ["jbindgen", "annotations", "android-test-activity"]
+
+[workspace.package]
+rust-version = "1.85"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/jni-rs/jbindgen"
+
+[workspace.dependencies]
+jni = { version = "0.22.4", features = ["invocation"] }
+jni-sys = "0.4.1"
+javac = "0.1.1"
+
+cafebabe = "0.9"
+log = "0.4"
+thiserror = "2"

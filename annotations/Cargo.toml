@@ -1,0 +1,10 @@
+[package]
+name = "jbindgen-annotations"
+version = "0.1.0"
+readme = "README.md"
+description = "A library containing embedded Java annotations for use in jbindgen"
+rust-version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+include = ["/src"]

@@ -1,0 +1,33 @@
+[advisories]
+
+# # RUSTSEC-2023-0071
+#
+# adb_client depends on the `rsa` crate which is affected by RUSTSEC-2023-0071.
+# It looks like this will soon be largely addressed by the `rsa` `0.10` release
+# (assuming this is then picked up by `adb_client`)
+#
+# In practice we only use `adb_client` for testing in `android-test-activity`
+# for connecting to local adb servers that interact with locally running
+# emulators, so the risk is minimal, and doesn't extend to users of jbindgen
+# itself, so we can afford to wait for the upstream fix and just ignore this
+# advisory in the meantime.
+#
+# Links: https://rustsec.org/advisories/RUSTSEC-2023-0071.html
+# https://github.com/RustCrypto/RSA/issues/19#issuecomment-1822995643
+# https://github.com/RustCrypto/RSA/issues/390
+# https://github.com/RustCrypto/RSA/issues/647
+#
+# # RUSTSEC-2026-0009
+#
+# The `time` crate is vulnerable to stack overflows parsing some deprecated
+# features of the RFC 2822 format.
+#
+# This is a low-risk issue for us since we don't directly use the `time` crate,
+# it is just used as a sub-dependency of the `zip` crate,  while zip files
+# don't store timestamps in `rfc2822` format.
+#
+# We also depend on the `time` crate via `adb_client` -> `rcgen` (which parses
+# X.509 certificate validity periods), but this is only used in our tests.
+#
+# Links: https://rustsec.org/advisories/RUSTSEC-2026-0009
+ignore = ["RUSTSEC-2023-0071", "RUSTSEC-2026-0009"]
