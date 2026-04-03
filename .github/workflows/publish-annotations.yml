@@ -27,13 +27,13 @@ jobs:
 
             - name: Publish to Maven Central
               env:
-                  MAVEN_GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
-                  MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
-                  CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
-                  CENTRAL_TOKEN: ${{ secrets.CENTRAL_TOKEN }}
+                  ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+                  ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+                  ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.CENTRAL_USERNAME }}
+                  ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.CENTRAL_TOKEN }}
               run: |
                   cd annotations
-                  ./gradlew publish \
+                  ./gradlew publishToMavenCentral \
                     -PversionSuffix= \
                     -PallowFullRelease=true \
                     --no-daemon --stacktrace

@@ -4,8 +4,8 @@
 
 plugins {
     id 'java-library'
-    id 'maven-publish'
     id 'signing'
+    id "com.vanniktech.maven.publish" version "0.36.0"
 }
 
 repositories {
@@ -28,7 +28,7 @@ if (versionSuffix.isEmpty() && !allowFullRelease) {
         "\n" +
         "Publishing a full release requires -PallowFullRelease=true.\n" +
         "This prevents accidental releases.\n\n" +
-        "Usage: ./gradlew publish -PversionSuffix= -PallowFullRelease=true\n"
+        "Usage: ./gradlew publishToMavenCentral -PversionSuffix= -PallowFullRelease=true\n"
     )
 }
 
@@ -43,93 +43,53 @@ def scmUrl = 'https://github.com/jni-rs/jbindgen'
 description = projectDescription
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
-java {
-    withSourcesJar()
-    withJavadocJar()
-}
+mavenPublishing {
+    coordinates(group, 'jbindgen-annotations', version)
 
-publishing {
-    repositories {
-        maven {
-            name = "Central"
-            def releasesRepoUrl = "https://central.sonatype.com/api/v1/publisher/upload"
-            def snapshotsRepoUrl = "https://central.sonatype.com/repository/maven-snapshots/"
-            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+    pom {
+        name = projectName
+        description = projectDescription
+        url = projectUrl
 
-            credentials {
-                username = System.getenv("CENTRAL_USERNAME") ?: findProperty("jbindgen.centralUsername")
-                password = System.getenv("CENTRAL_TOKEN") ?: findProperty("jbindgen.centralToken")
+        licenses {
+            license {
+                name = 'The Apache License, Version 2.0'
+                url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                distribution = 'repo'
             }
-
-            // For snapshots only, use basic authentication
-            if (version.endsWith('SNAPSHOT')) {
-                authentication {
-                    basic(BasicAuthentication)
-                }
+            license {
+                name = 'The MIT License'
+                url = 'https://opensource.org/licenses/MIT'
+                distribution = 'repo'
             }
+        }
+
+        developers {
+            developer {
+                id = 'jni-rs'
+                name = 'JNI-RS Contributors'
+                url = 'https://github.com/jni-rs/jbindgen/graphs/contributors'
+            }
+        }
+
+        scm {
+            url = scmUrl
+            connection = "scm:git:git://github.com/jni-rs/jbindgen.git"
+            developerConnection = "scm:git:ssh://git@github.com/jni-rs/jbindgen.git"
         }
     }
 
-    publications {
-        maven(MavenPublication) {
-            from(components.java)
+    publishToMavenCentral()
 
-            pom {
-                name = projectName
-                description = projectDescription
-                url = projectUrl
-
-                licenses {
-                    license {
-                        name = 'Apache License, Version 2.0'
-                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
-                        distribution = 'repo'
-                    }
-                    license {
-                        name = 'MIT License'
-                        url = 'https://opensource.org/licenses/MIT'
-                        distribution = 'repo'
-                    }
-                }
-
-                developers {
-                    developer {
-                        name = 'JNI-RS Contributors'
-                        url = 'https://github.com/jni-rs/jbindgen/graphs/contributors'
-                    }
-                }
-
-                scm {
-                    connection = "scm:git:git://${scmUrl.replace('https://', '')}.git"
-                    developerConnection = "scm:git:ssh://${scmUrl.replace('https://', '')}.git"
-                    url = "${scmUrl}/tree/master"
-                }
-            }
-        }
-    }
+    signAllPublications()
 }
 
 signing {
-    def signingKey = System.getenv("MAVEN_GPG_PRIVATE_KEY")
-    def signingPassword = System.getenv("MAVEN_GPG_PASSPHRASE") ?: findProperty("signing.password")
-
-    if (signingKey && signingPassword) {
-        // CI: Use in-memory ASCII-armored keys
-        useInMemoryPgpKeys(signingKey, signingPassword)
-    } else if (findProperty("signing.gnupg.executable")) {
+    if (findProperty("signing.gnupg.executable")) {
         // Local: Use GPG agent (prompts for passphrase)
         useGpgCmd()
-    } else if (findProperty("signing.keyId")) {
-        // Local: Use keyring file (legacy)
-        // Properties automatically picked up from gradle.properties
-    } else {
-        logger.warn("No signing configuration found. Set MAVEN_GPG_PRIVATE_KEY/MAVEN_GPG_PASSPHRASE " +
-                    "or configure signing.* properties in gradle.properties")
     }
-
-    sign publishing.publications.maven
-
-    required = { !version.endsWith('-SNAPSHOT') && gradle.taskGraph.hasTask("publish") }
+    sign configurations.runtimeElements
 }
 
 tasks.withType(JavaCompile) {

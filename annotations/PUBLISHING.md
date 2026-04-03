@@ -61,8 +61,8 @@ Create or edit `~/.gradle/gradle.properties`:
 
 ```properties
 # Maven Central Credentials
-jbindgen.centralUsername=your-token-username
-jbindgen.centralToken=your-token-password
+mavenCentralUsername=your-token-username
+mavenCentralPassword=your-token-password
 
 # GPG Signing - using GPG agent (recommended, uses default key and prompts for passphrase)
 signing.gnupg.executable=gpg
@@ -97,18 +97,18 @@ You can override the version suffix using Gradle properties:
 
 ```bash
 # Use default snapshot version (0.1.0-SNAPSHOT)
-./gradlew build
+./gradlew publishToMavenCentral
 
 # Override suffix for a release candidate
-./gradlew publish -PversionSuffix=-RC1
+./gradlew publishToMavenCentral -PversionSuffix=-RC1
 # Result: 0.1.0-RC1
 
 # Another release candidate
-./gradlew publish -PversionSuffix=-RC2
+./gradlew publishToMavenCentral -PversionSuffix=-RC2
 # Result: 0.1.0-RC2
 
 # Full release (requires safety flag)
-./gradlew publish -PversionSuffix= -PallowFullRelease=true
+./gradlew publishToMavenCentral -PversionSuffix= -PallowFullRelease=true
 # Result: 0.1.0
 ```
 
@@ -123,10 +123,10 @@ flag will fail with an error:
 
 ```bash
 # This will FAIL with an error
-./gradlew publish -PversionSuffix=
+./gradlew publishToMavenLocal -PversionSuffix=
 
 # This will succeed
-./gradlew publish -PversionSuffix= -PallowFullRelease=true
+./gradlew publishToMavenCentral -PversionSuffix= -PallowFullRelease=true
 ```
 
 ## Publishing from Local Development
@@ -166,7 +166,7 @@ Snapshots are mutable and useful for development/testing.
 
 ```bash
 # Publish snapshot with default version (0.1.0-SNAPSHOT)
-./gradlew publish
+./gradlew publishToMavenCentral
 
 # Published to: https://central.sonatype.com/repository/maven-snapshots/
 #   io/github/jni-rs/jbindgen-annotations/0.1.0-SNAPSHOT/maven-metadata.xml
@@ -184,11 +184,11 @@ Release candidates are immutable releases for testing before final release.
 
 ```bash
 # Publish release candidate (no build.gradle changes needed)
-./gradlew publish -PversionSuffix=-RC1
+./gradlew publishToMavenCentral -PversionSuffix=-RC1
 # Result: 0.1.0-RC1
 
 # Subsequent RC for the same base version
-./gradlew publish -PversionSuffix=-RC2
+./gradlew publishToMavenCentral -PversionSuffix=-RC2
 # Result: 0.1.0-RC2
 ```
 
@@ -252,8 +252,8 @@ EOF
 gpg --keyserver keys.openpgp.org --send-keys <KEY_ID>
 gpg --keyserver keyserver.ubuntu.com --send-keys <KEY_ID>
 
-# Export private key (base64 encoded for MAVEN_GPG_PRIVATE_KEY)
+# Export private key (base64 encoded for ORG_GRADLE_PROJECT_signingInMemoryKey)
 gpg --export-secret-keys --armor <KEY_ID> | base64 -w0 > gpg-key.txt
 
-# The passphrase will be needed for MAVEN_GPG_PASSPHRASE
+# The passphrase will be needed for ORG_GRADLE_PROJECT_signingInMemoryKeyPassword
 ```
