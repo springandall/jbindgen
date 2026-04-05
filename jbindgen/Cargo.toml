@@ -7,7 +7,7 @@ rust-version.workspace = true
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
-include = ["/src", "/examples"]
+include = ["/src", "build.rs", "/examples"]
 
 [[bin]]
 name = "jbindgen"
