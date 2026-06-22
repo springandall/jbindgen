@@ -4,6 +4,7 @@ use crate::error::{Error, Result};
 use crate::parser_types::{
     ArgInfo, ClassInfo, FieldInfo, InstanceOfInfo, MethodInfo, MethodSignature, TypeInfo,
 };
+use cafebabe::attributes::AttributeData::MethodParameters;
 use cafebabe::{ClassFile, FieldAccessFlags, MethodAccessFlags};
 
 /// Parse a JNI type descriptor into TypeInfo
@@ -206,7 +207,8 @@ pub fn parse_class(class: &ClassFile) -> Result<ClassInfo> {
             continue;
         }
 
-        let (arguments, return_type) = parse_method_descriptor(&descriptor)?;
+        let (mut arguments, return_type) = parse_method_descriptor(&descriptor)?;
+        append_method_param(method, &mut arguments);
 
         let method_info = MethodInfo {
             name,
@@ -268,4 +270,34 @@ pub fn parse_class(class: &ClassFile) -> Result<ClassInfo> {
         native_methods,
         instance_of,
     })
+}
+
+fn append_method_param(method: &cafebabe::MethodInfo, arguments: &mut Vec<ArgInfo>) {
+    let params = parse_method_params(method);
+    if let Some(mut params) = params {
+        if params.len() == arguments.len() {
+            for args in arguments.iter_mut() {
+                let param = params.remove(0);
+                if param.is_some() {
+                    args.name = param;
+                }
+            }
+        }
+    }
+}
+
+fn parse_method_params(method: &cafebabe::MethodInfo) -> Option<Vec<Option<String>>> {
+    method
+        .attributes
+        .iter()
+        .filter_map(|attr| match &attr.data {
+            MethodParameters(params) => Some(
+                params
+                    .iter()
+                    .map(|param| param.name.clone().map(|v| v.to_string()))
+                    .collect::<Vec<_>>(),
+            ),
+            _ => None,
+        })
+        .min()
 }
