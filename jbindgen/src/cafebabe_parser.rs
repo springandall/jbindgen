@@ -168,10 +168,6 @@ pub fn parse_class(class: &ClassFile) -> Result<ClassInfo> {
 
     // Parse fields
     for field in &class.fields {
-        // Skip private fields
-        if field.access_flags.contains(FieldAccessFlags::PRIVATE) {
-            continue;
-        }
 
         let name = field.name.to_string();
         let descriptor = field.descriptor.to_string();
